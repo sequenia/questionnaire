@@ -2,15 +2,24 @@ package com.sequenia.sibgurmanquestionnaire.helpers;
 
 import android.content.Context;
 
+import com.sequenia.sibgurmanquestionnaire.models.Answerd;
+import com.sequenia.sibgurmanquestionnaire.models.AnswerdTypeFree;
+import com.sequenia.sibgurmanquestionnaire.models.AnswerdTypeRaing;
+import com.sequenia.sibgurmanquestionnaire.models.AnswerdTypeSelect;
+import com.sequenia.sibgurmanquestionnaire.models.AnswerdTypeTranslate;
+import com.sequenia.sibgurmanquestionnaire.models.Interview;
 import com.sequenia.sibgurmanquestionnaire.models.Migration;
 import com.sequenia.sibgurmanquestionnaire.models.Question;
 import com.sequenia.sibgurmanquestionnaire.models.Questionnaire;
+import com.sequenia.sibgurmanquestionnaire.models.Sample;
 import com.sequenia.sibgurmanquestionnaire.models.SchemaQuestions;
 
 import java.util.ArrayList;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmList;
+import io.realm.RealmObject;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -224,14 +233,30 @@ public class DatabeseHelpers {
         return getRealm(context).where(Questionnaire.class).equalTo("id",id_questionnaire).findFirst();
     }
 
+    public static Questionnaire getLastActualQuestionnaires(Context context){
+
+        RealmResults<Questionnaire> questionnaires=getRealm(context).where(Questionnaire.class).
+                equalTo("answered",false).
+                equalTo("actual",true).
+                equalTo("departure",false).findAll();
+
+        if (questionnaires.size()==0){
+            return null;
+        }
+        return questionnaires.get(questionnaires.size()-1);
+
+    }
     public static RealmResults<Questionnaire> getQuestionnaires(Context context){
         return getRealm(context).where(Questionnaire.class).findAll();
+    }
+    public static int getSizeQuestionare(Context context){
+        return getRealm(context).where(Questionnaire.class).findAll().size();
     }
 
     public static void updateSchemaQuestion(Context context, String jsonString){
         Realm realm= getRealm(context);
         SchemaQuestions schemaQuestions=new SchemaQuestions();
-        schemaQuestions.setId(getIdSchemaQuestion(context)+1);
+        schemaQuestions.setId(1);
         schemaQuestions.setSchema(jsonString);
         realm.beginTransaction();
         realm.copyToRealmOrUpdate(schemaQuestions);
@@ -247,4 +272,102 @@ public class DatabeseHelpers {
         }
         return i;
     }
+
+    public static void updateAnswerd(Context context, ArrayList<Answerd>answerds){
+        Realm realm=getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(answerds);
+        realm.commitTransaction();
+    }
+    public static void updateSample(Context context, ArrayList<Sample>samples){
+        Realm realm=getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(samples);
+        realm.commitTransaction();
+    }
+    public static void updateAnswerTypeFree(Context context, ArrayList<AnswerdTypeFree>answerdTypeFrees){
+        Realm realm=getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(answerdTypeFrees);
+        realm.commitTransaction();
+    }
+    public static void updateAnswerTypeFree(Context context, AnswerdTypeFree answerdTypeFrees){
+        Realm realm=getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(answerdTypeFrees);
+        realm.commitTransaction();
+    }
+    public static void updateAnswerdTypeRaing(Context context, AnswerdTypeRaing answerdTypeRaings){
+        Realm realm=getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(answerdTypeRaings);
+        realm.commitTransaction();
+    }
+    public static void updateAnswerdTypeRaing(Context context, ArrayList<AnswerdTypeRaing>answerdTypeRaings){
+        Realm realm=getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(answerdTypeRaings);
+        realm.commitTransaction();
+    }
+    public static void updateAnswerdTypeSelected(Context context, ArrayList<AnswerdTypeSelect>answerdTypeSelects){
+        Realm realm=getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(answerdTypeSelects);
+        realm.commitTransaction();
+    }
+    public static void updateAnswerdTypeSelected(Context context, AnswerdTypeSelect answerdTypeSelects){
+        Realm realm=getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(answerdTypeSelects);
+        realm.commitTransaction();
+    }
+    public static void updateAnswerdTypeTranslate(Context context, ArrayList<AnswerdTypeTranslate>answerdTypeTranslates){
+        Realm realm=getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(answerdTypeTranslates);
+        realm.commitTransaction();
+    }
+    public static void updateAnswerdTypeTranslate(Context context,AnswerdTypeTranslate answerdTypeTranslates) {
+        Realm realm = getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(answerdTypeTranslates);
+        realm.commitTransaction();
+    }
+
+        public static RealmResults<Answerd> getAnswered(Context context){
+        return getRealm(context).where(Answerd.class).findAll();
+    }
+
+    public static RealmResults<AnswerdTypeFree> getAnsweredTypeFree(Context context,int id, int interview_id){
+        return getRealm(context).where(AnswerdTypeFree.class).equalTo("id",id).equalTo("interview_id",interview_id).findAll();
+    }
+  /*  int id;
+    int simple_id;
+    int quest_id;
+    int interview_id;*/
+    public static RealmResults<AnswerdTypeRaing> getAnsweredTypeRaing(Context context,int id, int interview_id ){
+        return getRealm(context).where(AnswerdTypeRaing.class).equalTo("id",id).equalTo("interview_id",interview_id).findAll();
+    }
+    public static RealmResults<AnswerdTypeSelect> getAnswerdTypeSelect(Context context,int id, int interview_id){
+        return getRealm(context).where(AnswerdTypeSelect.class).equalTo("id",id).equalTo("interview_id",interview_id).findAll();
+    }
+    public static RealmResults<AnswerdTypeTranslate> getAnswerdTypeTranslate(Context context,int id, int interview_id){
+        return getRealm(context).where(AnswerdTypeTranslate.class).equalTo("id",id).equalTo("interview_id",interview_id).findAll();
+    }
+    public static RealmResults<Sample> getSample(Context context ){
+        return getRealm(context).where(Sample.class).findAll();
+    }
+
+    public static void updateInterview(Context context, Interview interview){
+        Realm realm  = getRealm(context);
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(interview);
+        realm.commitTransaction();
+
+    }
+
+    public static RealmResults<Sample> getSampleByIDQuestionary(Context context,int id){
+        return getRealm(context).where(Sample.class).equalTo("idQuestionary",id).findAll();
+    }
+
 }

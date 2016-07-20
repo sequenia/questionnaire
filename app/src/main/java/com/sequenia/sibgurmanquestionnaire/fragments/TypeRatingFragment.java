@@ -13,6 +13,8 @@ import android.widget.TextView;
 import com.sequenia.sibgurmanquestionnaire.R;
 import com.sequenia.sibgurmanquestionnaire.adapters.QestionAdapter;
 import com.sequenia.sibgurmanquestionnaire.adapters.RaitingQuestAdapter;
+import com.sequenia.sibgurmanquestionnaire.helpers.DatabeseHelpers;
+import com.sequenia.sibgurmanquestionnaire.models.AnswerdTypeRaing;
 import com.sequenia.sibgurmanquestionnaire.models.Question;
 import com.sequenia.sibgurmanquestionnaire.models.Sample;
 import com.sequenia.sibgurmanquestionnaire.models.TypeRaing;
@@ -29,19 +31,22 @@ public class TypeRatingFragment extends Fragment{
     private TextView commentQuestion;
     private RecyclerView recyclerView;
     private RaitingQuestAdapter raitingQuestAdapter;
-
+    private ArrayList<Sample> sampleAns;
+    private ArrayList<AnswerdTypeRaing> answerdTypeRaings;
 
     private static final String ARG_RATING="com.sequenia.sibgurmanquestionnaire.fragments.rating";
-    private static final String ARG_SAMPLES="com.sequenia.sibgurmanquestionnaire.fragments.samples";
     private static final String ARG_TYPE_QUEST="com.sequenia.sibgurmanquestionnaire.fragments.type_quest";
+    private static final String ARG_QUESIOTN = "com.sequenia.sibgurmanquestionnaire.fragments.question";
+    private static final String ARG_INTERVIEW = "com.sequenia.sibgurmanquestionnaire.fragments.interview";
 
     private Question question;
-    public static TypeRatingFragment newInstance(Question question, ArrayList<Sample>samples,TypeRaing typeRaing){
+    public static TypeRatingFragment newInstance(TypeRaing typeRaing,Question question,int interview){
         TypeRatingFragment fragment = new TypeRatingFragment();
         Bundle bundle= new Bundle();
-        bundle.putSerializable(ARG_RATING, (Serializable) question);
         bundle.putSerializable(ARG_TYPE_QUEST,(Serializable)typeRaing);
-        bundle.putSerializable(ARG_SAMPLES,samples);
+        bundle.putSerializable(ARG_QUESIOTN,(Serializable)question);
+        bundle.putInt(ARG_INTERVIEW,interview);
+
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -52,10 +57,10 @@ public class TypeRatingFragment extends Fragment{
         View view=inflater.inflate(R.layout.type_rating_fragmnet,container,false);
 
         Bundle bundle = getArguments();
-        Question question =(Question) bundle.getSerializable(ARG_RATING);
+        Question question =(Question) bundle.getSerializable(ARG_QUESIOTN);
         TypeRaing typeRaing= (TypeRaing)bundle.get(ARG_TYPE_QUEST);
-        ArrayList<Sample> samples= (ArrayList<Sample>) bundle.getSerializable(ARG_SAMPLES);
-
+        ArrayList<Sample> samples= new ArrayList<>(DatabeseHelpers.getSample(getActivity()));
+        int interview = bundle.getInt(ARG_INTERVIEW);
         nameQuestion = (TextView)view.findViewById(R.id.name_question);
         commentQuestion = (TextView)view.findViewById(R.id.comment_question);
         recyclerView = (RecyclerView)view.findViewById(R.id.raiting_recycler);
@@ -64,11 +69,9 @@ public class TypeRatingFragment extends Fragment{
         nameQuestion.setText(question.getName());
         commentQuestion.setText(typeRaing.getCommit());
 
-        raitingQuestAdapter = new RaitingQuestAdapter(samples,typeRaing);
+        raitingQuestAdapter = new RaitingQuestAdapter(getActivity(),question,samples,typeRaing,interview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
         recyclerView.setAdapter(raitingQuestAdapter);
-
-
 
 
         return view;

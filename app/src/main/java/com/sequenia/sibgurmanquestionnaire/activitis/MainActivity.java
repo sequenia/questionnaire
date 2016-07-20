@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -28,6 +29,7 @@ import com.sequenia.sibgurmanquestionnaire.fragments.SelectedFragment;
 import com.sequenia.sibgurmanquestionnaire.fragments.TypeFreeFragment;
 import com.sequenia.sibgurmanquestionnaire.fragments.TypeRatingFragment;
 import com.sequenia.sibgurmanquestionnaire.fragments.TypeTranscriptFragment;
+import com.sequenia.sibgurmanquestionnaire.helpers.DatabeseHelpers;
 import com.sequenia.sibgurmanquestionnaire.helpers.DialogsHelper;
 import com.sequenia.sibgurmanquestionnaire.helpers.PermissionsChecker;
 import com.sequenia.sibgurmanquestionnaire.helpers.QuestionHelper;
@@ -37,7 +39,9 @@ import com.sequenia.sibgurmanquestionnaire.models.AnswerdTypeFree;
 import com.sequenia.sibgurmanquestionnaire.models.AnswerdTypeRaing;
 import com.sequenia.sibgurmanquestionnaire.models.AnswerdTypeSelect;
 import com.sequenia.sibgurmanquestionnaire.models.AnswerdTypeTranslate;
+import com.sequenia.sibgurmanquestionnaire.models.Interview;
 import com.sequenia.sibgurmanquestionnaire.models.Question;
+import com.sequenia.sibgurmanquestionnaire.models.Questionnaire;
 import com.sequenia.sibgurmanquestionnaire.models.Sample;
 import com.sequenia.sibgurmanquestionnaire.models.TypeFree;
 import com.sequenia.sibgurmanquestionnaire.models.TypeRaing;
@@ -49,6 +53,8 @@ import org.w3c.dom.Text;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+
+import io.realm.annotations.PrimaryKey;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -62,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView numberQuest;
     ProgressBar progressQuestions;
 
-
     ArrayList<Sample>answerdSample;
     ArrayList<Sample>samples;
     ArrayList<TypeFree>typeFrees;
@@ -73,7 +78,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ArrayList<AnswerdTypeFree>answerdTypeFrees;
     ArrayList<AnswerdTypeTranslate>answerdTypeTranslates;
     ArrayList<AnswerdTypeSelect>answerdTypeSelects;
-    ArrayList<Answerd>answerds;
     TypeRatingFragment fragment;
     TypeFreeFragment fragmentFree;
     TypeTranscriptFragment fragmentTranscript;
@@ -81,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private int idQuestion;
 
-
+    private int interview;
     private boolean permissionsAllShown = false; // Если уже показали, то не показывать
     private boolean permissionsOverlayShown = false; // Если уже показали, то не показывать
     private PermissionsChecker checker;
@@ -128,47 +132,76 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         questionnaireController= new QuestionnaireController(this);
         questionnaireController.loadQuestionnaire();
-        questions=questionnaireController.getQuestions();
+        ArrayList<Questionnaire> questionnaires=new ArrayList<>(DatabeseHelpers.getQuestionnaires(this));
+        if (questionnaires.size()==0){
+            questionnaireController.createQuestionnaire(1);
+        }
+        else{
+            questionnaireController.updateQuestionnaires(questionnaires.size()+1);
+        }
+
+
         samples = questionnaireController.getSamples();
         typeFrees=questionnaireController.getTypeFrees();
         typeRaings=questionnaireController.getTypeRaings();
         typeTranslates = questionnaireController.getTypeTranslates();
         typeSelects=questionnaireController.getTypeSelects();
 
-        answerdSample = questionnaireController.getAnswerSample();
-        answerdTypeRaings=questionnaireController.getAnswerdTypeRaings();
-        answerdTypeFrees=questionnaireController.getAnswerdTypeFrees();
+
+        Questionnaire questionnaire = questionnaireController.getActual();
+        interview = questionnaire.getInterviews().getId();
+
+       // answerdTypeRaings=questionnaireController.getAnswerdTypeRaings();
+      /*  answerdTypeFrees=questionnaireController.getAnswerdTypeFrees();
         answerdTypeTranslates=questionnaireController.getAnswerdTypeTranslates();
-        answerdTypeSelects=questionnaireController.getAnswerdTypeSelects();
-        answerds=questionnaireController.getAnswerds();
+        answerdTypeSelects = questionnaireController.getAnswerdTypeSelects();
+*/
+        answerdSample = questionnaireController.getAnswerSample();
 
 
+        updateQuestion();
 
+        progressQuestions.setMax(questions.size());
+        progressQuestions.setProgress(idQuestion+1);
+        selectFragment(questions.get(0));
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                selectFragment(questions.get(i));
+                drawerLayout.closeDrawer(GravityCompat.END);
+            }
+        });
+
+
+    }
+
+    public void updateQuestion()
+    {
+        questions=questionnaireController.getQuestions();
         int countQuestion=0;
         int countRequer=0;
         for (Question question:questions){
             if (!question.isAnswered()){
                 countQuestion++;
             }
-            if (!question.isRequired()){
+            if (question.isRequired()&&!question.isAnswered()){
                 countRequer++;
             }
         }
         if (countRequer>0){
             complete.setEnabled(false);
         }
+        else {
+            complete.setEnabled(true);
+        }
 
         complete.setText(getString(R.string.complete,countQuestion));
         numberQuest.setText(idQuestion+1+"/"+questions.size());
-
-        progressQuestions.setMax(questions.size());
-        progressQuestions.setProgress(idQuestion+1);
-        selectFragment(questions.get(0));
-
         setupAdapter();
-
-
     }
+
+
 
 
 
@@ -196,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case QuestionHelper.TYPE_RATING:
                 for(TypeRaing typeRaing: typeRaings){
                     if (typeRaing.getId()==question.getId()){
-                        fragment= TypeRatingFragment.newInstance(question,samples,typeRaing);
+                        fragment= TypeRatingFragment.newInstance(typeRaing,question,interview);
                         fTrans.add(R.id.contantFragment,fragment);
                         fTrans.commit();
                     }
@@ -206,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case QuestionHelper.TYPE_FREE:
                 for (TypeFree typeFree: typeFrees){
                     if (typeFree.getId()==question.getId()){
-                        fragmentFree= TypeFreeFragment.newInstance(question,samples,typeFree);
+                        fragmentFree= TypeFreeFragment.newInstance(typeFree,question,interview);
                         fTrans.add(R.id.contantFragment,fragmentFree);
                         fTrans.commit();
                     }
@@ -216,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case QuestionHelper.TYPE_TRANSCRIPT:
                 for(TypeTranslate typeTranslate:typeTranslates){
                     if(typeTranslate.getId()==question.getId()){
-                        fragmentTranscript = TypeTranscriptFragment.newInstance(question,samples,typeTranslate);
+                        fragmentTranscript = TypeTranscriptFragment.newInstance(typeTranslate,question,interview);
                         fTrans.add(R.id.contantFragment,fragmentTranscript);
                         fTrans.commit();
                     }
@@ -226,19 +259,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case QuestionHelper.TYPE_SELECTED:
                 for(TypeSelect typeSelect:typeSelects){
                     if (typeSelect.getId()==question.getId()){
-                        selectedFragment = SelectedFragment.newInstance(question,samples);
+                        selectedFragment = SelectedFragment.newInstance(question,answerdSample,answerdTypeSelects,interview);
                         fTrans.add(R.id.contantFragment,selectedFragment);
                         fTrans.commit();
                     }
                 }
 
-                //fTrans.remove(fragmentFree);
-
-
-                break;
+                //fTrans.remove(fragmentFree);break;
         }
-
-
 
     }
 
@@ -273,8 +301,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 selectFragment(question1);
                 break;
             case R.id.complete:
+                completedInterview();
                 break;
         }
+    }
+    private void completedInterview(){
+
     }
 
     @Override

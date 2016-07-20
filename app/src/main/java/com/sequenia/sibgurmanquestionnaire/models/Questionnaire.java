@@ -1,5 +1,6 @@
 package com.sequenia.sibgurmanquestionnaire.models;
 
+import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -12,10 +13,18 @@ public class Questionnaire extends RealmObject {
     private int id;
     private int schemaQuestions;
     private String schemaAnswer;
+    private Interview interviews;
     private boolean answered;
     private boolean actual;
     private boolean departure;
 
+    public Interview getInterviews() {
+        return interviews;
+    }
+
+    public void setInterviews(Interview interviews) {
+        this.interviews = interviews;
+    }
 
     public int getId() {
         return id;

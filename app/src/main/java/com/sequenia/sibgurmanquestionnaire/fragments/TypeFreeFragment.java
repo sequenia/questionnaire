@@ -13,6 +13,9 @@ import android.widget.TextView;
 import com.sequenia.sibgurmanquestionnaire.R;
 import com.sequenia.sibgurmanquestionnaire.adapters.FreeQuestAdapter;
 import com.sequenia.sibgurmanquestionnaire.adapters.RaitingQuestAdapter;
+import com.sequenia.sibgurmanquestionnaire.helpers.DatabeseHelpers;
+import com.sequenia.sibgurmanquestionnaire.models.AnswerdTypeFree;
+import com.sequenia.sibgurmanquestionnaire.models.AnswerdTypeRaing;
 import com.sequenia.sibgurmanquestionnaire.models.Question;
 import com.sequenia.sibgurmanquestionnaire.models.Sample;
 import com.sequenia.sibgurmanquestionnaire.models.TypeFree;
@@ -28,16 +31,21 @@ public class TypeFreeFragment extends Fragment{
     private TextView nameQuestion;
     private RecyclerView recyclerView;
     private FreeQuestAdapter freeQuestAdapter;
+    private ArrayList<Sample> sampleAns;
+    private ArrayList<AnswerdTypeFree> answerdTypeFrees;
+
 
     private static final String ARG_FREE="com.sequenia.sibgurmanquestionnaire.fragments.free";
-    private static final String ARG_SAMPLES="com.sequenia.sibgurmanquestionnaire.fragments.samples";
+
     private static final String ARG_TYPE_QUEST="com.sequenia.sibgurmanquestionnaire.fragments.type_quest";
-    public static TypeFreeFragment newInstance(Question question, ArrayList<Sample>samples, TypeFree typeFree){
+    private static final String ARG_QUESIOTN = "com.sequenia.sibgurmanquestionnaire.fragments.question";
+    private static final String ARG_INTERVIEW = "com.sequenia.sibgurmanquestionnaire.fragments.interview";
+    public static TypeFreeFragment newInstance(TypeFree typeFree,Question question,int interview){
         TypeFreeFragment freeFragment= new TypeFreeFragment();
         Bundle bundle=new Bundle();
-        bundle.putSerializable(ARG_FREE,(Serializable)question);
         bundle.putSerializable(ARG_TYPE_QUEST,(Serializable)typeFree);
-        bundle.putSerializable(ARG_SAMPLES,samples);
+        bundle.putSerializable(ARG_QUESIOTN,(Serializable)question);
+        bundle.putInt(ARG_INTERVIEW,interview);
         freeFragment.setArguments(bundle);
         return freeFragment;
     }
@@ -48,9 +56,10 @@ public class TypeFreeFragment extends Fragment{
         View view = inflater.inflate(R.layout.type_free_fragment,container,false);
 
         Bundle bundle = getArguments();
-        Question question=(Question)bundle.getSerializable(ARG_FREE);
+        Question question=(Question)bundle.getSerializable(ARG_QUESIOTN);
         TypeFree typeFree = (TypeFree)bundle.get(ARG_TYPE_QUEST);
-        ArrayList<Sample>samples = (ArrayList<Sample>)bundle.getSerializable(ARG_SAMPLES);
+        ArrayList<Sample> samples= new ArrayList<>(DatabeseHelpers.getSample(getActivity()));
+        int interview = bundle.getInt(ARG_INTERVIEW);
 
         nameQuestion = (TextView)view.findViewById(R.id.name_question);
         recyclerView = (RecyclerView)view.findViewById(R.id.free_recycler);
@@ -59,7 +68,7 @@ public class TypeFreeFragment extends Fragment{
 
         nameQuestion.setText(question.getName());
 
-        freeQuestAdapter = new FreeQuestAdapter(samples,typeFree);
+        freeQuestAdapter = new FreeQuestAdapter(getActivity(),question,samples,typeFree,interview);
         recyclerView.setAdapter(freeQuestAdapter);
 
 

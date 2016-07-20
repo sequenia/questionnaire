@@ -16,10 +16,11 @@ import java.util.ArrayList;
 /**
  * Created by ivan1 on 06.07.2016.
  */
-public class QestionAdapter extends BaseAdapter{
+public class QestionAdapter extends BaseAdapter {
 
     Context context;
     LayoutInflater lInflater;
+
     ArrayList<Question> objects;
 
     public QestionAdapter(Context context,LayoutInflater inflater,ArrayList<Question>questions){

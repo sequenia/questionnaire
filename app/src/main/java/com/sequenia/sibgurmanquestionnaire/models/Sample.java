@@ -3,15 +3,19 @@ package com.sequenia.sibgurmanquestionnaire.models;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by ivan1 on 07.07.2016.
  */
-public class Sample implements Serializable{
+public class Sample extends RealmObject implements Serializable{
+    @PrimaryKey
     int id;
+    int idQuestionary;
     String name;
-    ArrayList<Answerd> answerds;
+    RealmList<Answerd> answerds;
 
     public int getId() {
         return id;
@@ -29,11 +33,27 @@ public class Sample implements Serializable{
         this.name = name;
     }
 
-    public ArrayList<Answerd> getAnswerd() {
+    public RealmList<Answerd> getAnswerd() {
         return answerds;
     }
 
-    public void setAnswerd(ArrayList<Answerd> answerds) {
+    public void setAnswerd(RealmList<Answerd> answerds) {
+        this.answerds = answerds;
+    }
+
+    public int getIdQuestionary() {
+        return idQuestionary;
+    }
+
+    public void setIdQuestionary(int idQuestionary) {
+        this.idQuestionary = idQuestionary;
+    }
+
+    public RealmList<Answerd> getAnswerds() {
+        return answerds;
+    }
+
+    public void setAnswerds(RealmList<Answerd> answerds) {
         this.answerds = answerds;
     }
 }

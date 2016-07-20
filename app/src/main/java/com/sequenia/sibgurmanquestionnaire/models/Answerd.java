@@ -1,10 +1,14 @@
 package com.sequenia.sibgurmanquestionnaire.models;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by ivan1 on 08.07.2016.
  */
-public class Answerd {
+public class Answerd extends RealmObject {
 
+    @PrimaryKey
     private int id;
     private String name;
     private int type;
